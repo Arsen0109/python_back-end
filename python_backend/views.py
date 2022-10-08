@@ -2,16 +2,14 @@ from python_backend import app
 from flask import jsonify, request
 import datetime
 
-
 user_id = 1
 category_id = 1
 note_id = 1
 
-
 CATEGORIES = [
     {
         "id": category_id,
-        "name": "Payment for apartments"
+        "title": "Payment for apartments"
     }
 ]
 
@@ -19,6 +17,7 @@ USERS = [
     {
         "id": user_id,
         "name": "Vasyl",
+
     }
 ]
 
@@ -51,6 +50,22 @@ def create_user():
 
     USERS.append(request_data)
     print(USERS)
+    return request_data
+
+
+@app.route("/category", methods=["POST"])
+def create_category():
+    request_data = {}
+    global category_id
+    category_id += 1
+    request_data["id"] = category_id
+    try:
+        request_data["title"] = request.get_json()["title"]
+    except:
+        request_data["title"] = "Title" + str(user_id)
+
+    CATEGORIES.append(request_data)
+    print(CATEGORIES)
     return request_data
 
 
