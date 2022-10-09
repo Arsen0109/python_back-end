@@ -26,7 +26,7 @@ NOTES = [
         "user_id": user_id,
         "category_id": category_id,
         "price": 1000,
-        "date_of_creating": datetime.date.today()
+        "date_of_creating": datetime.datetime.now()
     }
 ]
 
@@ -46,13 +46,15 @@ def hello():
 @app.route("/user", methods=["POST"])
 def create_user():
     request_data = {}
-    global user_id
-    user_id += 1
-    request_data["id"] = user_id
+
     try:
+        global user_id
+        user_id += 1
+        request_data["id"] = user_id
         request_data["name"] = request.get_json()["name"]
     except:
         return "Error bad request"
+
 
     USERS.append(request_data)
     return request_data
@@ -61,10 +63,10 @@ def create_user():
 @app.route("/category", methods=["POST"])
 def create_category():
     request_data = {}
-    global category_id
-    category_id += 1
-    request_data["id"] = category_id
     try:
+        global category_id
+        category_id += 1
+        request_data["id"] = category_id
         request_data["title"] = request.get_json()["title"]
     except:
         return "Error bad request"
@@ -75,11 +77,12 @@ def create_category():
 @app.route("/note", methods=["POST"])
 def create_note():
     request_data = request.get_json()
-    global note_id
-    note_id += 1
+
     try:
         if not (validation("id", request.get_json()["user_id"], USERS) and validation("id", request.get_json()["category_id"], CATEGORIES)):
             return "Error, user or category is not found"
+        global note_id
+        note_id += 1
         request_data["id"] = note_id
         request_data["date_of_creating"] = datetime.datetime.now().strftime("%d.%m.%Y %H:%M:%S")
         request_data["price"] = request.get_json()["price"]
@@ -103,3 +106,36 @@ def get_categories():
 @app.route("/notes")
 def get_notes():
     return jsonify({"notes": NOTES})
+
+
+@app.route("/user-notes", methods=["POST"])
+def get_user_notes():
+    request_data = request.get_json()
+    try:
+        id_user = request_data["user_id"]
+        user_notes = []
+        for note in NOTES:
+            if note["user_id"] == id_user:
+                user_notes.append(note)
+        return jsonify(user_notes)
+    except:
+        return "Error bad request"
+
+
+@app.route("/user_notes_by_category", methods=["POST"])
+def get_user_notes_by_category():
+    request_data = request.get_json()
+    try:
+        id_user = request_data["user_id"]
+        id_category = request_data["category_id"]
+        user_notes = []
+        for note in NOTES:
+            if note["user_id"] == id_user and note["category_id"] == id_category:
+                user_notes.append(note)
+        return jsonify(user_notes)
+    except:
+        return "Error bad request"
+
+
+
+
