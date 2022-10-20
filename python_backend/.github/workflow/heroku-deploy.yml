@@ -13,6 +13,6 @@ jobs:
      - uses: akhileshns/heroku-deploy@v3.12.12
        with:
          heroku_api_key: ${{secrets.HEROKU_API_KEY}}
-         heroku_app_name: "python-backend"
+         heroku_app_name: "python-backend-on-flask"
          heroku_email: "balasarseniy777@gmail.com"
          usedocker: true
