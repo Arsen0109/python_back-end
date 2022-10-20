@@ -26,7 +26,7 @@ NOTES = [
         "user_id": user_id,
         "category_id": category_id,
         "price": 1000,
-        "date_of_creating": datetime.datetime.now()
+        "date_of_creating": datetime.datetime.now().strftime("%d.%m.%Y %H:%M:%S")
     }
 ]
 
