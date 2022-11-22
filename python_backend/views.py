@@ -1,34 +1,16 @@
 from python_backend import app
 from flask import jsonify, request
 import datetime
+from . import db
+from flask_smorest import abort
 
 user_id = 1
 category_id = 1
 note_id = 1
 
-CATEGORIES = [
-    {
-        "id": category_id,
-        "title": "Payment for apartments"
-    }
-]
-
-USERS = [
-    {
-        "id": user_id,
-        "name": "Vasyl"
-    }
-]
-
-NOTES = [
-    {
-        "id": note_id,
-        "user_id": user_id,
-        "category_id": category_id,
-        "price": 1000,
-        "date_of_creating": datetime.datetime.now().strftime("%d.%m.%Y %H:%M:%S")
-    }
-]
+CATEGORIES = db.CATEGORIES
+USERS = db.USERS
+NOTES = db.NOTES
 
 
 def validation(key, value, arr):
@@ -56,7 +38,7 @@ def create_user():
         return "Error bad request"
 
 
-    USERS.append(request_data)
+    db.USERS.append(request_data)
     return request_data
 
 
@@ -70,7 +52,7 @@ def create_category():
         request_data["title"] = request.get_json()["title"]
     except:
         return "Error bad request"
-    CATEGORIES.append(request_data)
+    db.CATEGORIES.append(request_data)
     return request_data
 
 
@@ -79,7 +61,7 @@ def create_note():
     request_data = request.get_json()
 
     try:
-        if not (validation("id", request.get_json()["user_id"], USERS) and validation("id", request.get_json()["category_id"], CATEGORIES)):
+        if not (validation("id", request.get_json()["user_id"], USERS) or validation("id", request.get_json()["category_id"], CATEGORIES)):
             return "Error, user or category is not found"
         global note_id
         note_id += 1
@@ -89,7 +71,7 @@ def create_note():
     except:
         return "Error bad request"
 
-    NOTES.append(request_data)
+    db.NOTES.append(request_data)
     return request_data
 
 
