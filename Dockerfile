@@ -1,6 +1,7 @@
 FROM python:3.8.3
 
 ENV FLASK_APP=python_backend
+ENV FLASK_DEBUG=$FLASK_DEBUG
 
 WORKDIR /opt
 
