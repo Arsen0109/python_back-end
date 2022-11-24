@@ -33,12 +33,8 @@ class CategoryList(MethodView):
         return CATEGORIES
 
     @blp.arguments(CategorySchema)
-    def post(self):
-        request_data = {}
+    def post(self, request_data):
         global categoryId
         categoryId += 1
-        request_data["id"] = categoryId
-        request_data["title"] = request.get_json()["title"]
-
-        CATEGORIES[categoryId] = request_data
-        return jsonify(request_data)
+        CATEGORIES[categoryId] = {"id": categoryId, "title": request_data["title"]}
+        return jsonify(CATEGORIES[categoryId])

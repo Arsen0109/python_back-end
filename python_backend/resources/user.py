@@ -32,11 +32,8 @@ class UserList(MethodView):
         return USERS
 
     @blp.arguments(UserSchema)
-    def post(self):
-        request_data = {}
+    def post(self, request_data):
         global userId
         userId += 1
-        request_data["id"] = userId
-        request_data["name"] = request.get_json()["name"]
-        USERS[userId] = request_data
-        return jsonify(request_data)
+        USERS[userId] = {"id": userId, "name": request_data["name"]}
+        return jsonify(USERS[userId])
