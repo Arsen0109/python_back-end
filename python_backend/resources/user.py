@@ -2,6 +2,7 @@ from flask_smorest import Blueprint, abort
 from flask import request, jsonify
 from flask.views import MethodView
 from python_backend.db import USERS
+from python_backend.schemas import UserSchema
 
 blp = Blueprint("user", __name__, description="more comfortable operations with users")
 
@@ -30,14 +31,12 @@ class UserList(MethodView):
     def get(self):
         return USERS
 
+    @blp.arguments(UserSchema)
     def post(self):
         request_data = {}
         global userId
-        try:
-            userId += 1
-            request_data["id"] = userId
-            request_data["name"] = request.get_json()["name"]
-        except:
-            return "Error bad request"
+        userId += 1
+        request_data["id"] = userId
+        request_data["name"] = request.get_json()["name"]
         USERS[userId] = request_data
         return jsonify(request_data)

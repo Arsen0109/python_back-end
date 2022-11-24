@@ -2,6 +2,9 @@ from flask_smorest import Blueprint, abort
 from flask.views import MethodView
 from python_backend.db import CATEGORIES
 from flask import request, jsonify
+
+from python_backend.schemas import CategorySchema
+
 blp = Blueprint("category", __name__, description="more comfortable operations with categories")
 
 categoryId = 1
@@ -29,14 +32,13 @@ class CategoryList(MethodView):
     def get(self):
         return CATEGORIES
 
+    @blp.arguments(CategorySchema)
     def post(self):
         request_data = {}
         global categoryId
-        try:
-            categoryId += 1
-            request_data["id"] = categoryId
-            request_data["title"] = request.get_json()["title"]
-        except:
-            abort(400, message="Error bad request")
+        categoryId += 1
+        request_data["id"] = categoryId
+        request_data["title"] = request.get_json()["title"]
+
         CATEGORIES[categoryId] = request_data
         return jsonify(request_data)
