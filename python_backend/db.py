@@ -29,3 +29,7 @@ NOTES = {
         "date_of_creating": datetime.datetime.now().strftime("%d.%m.%Y %H:%M:%S")
     }
 }
+
+from flask_sqlalchemy import SQLAlchemy
+
+db = SQLAlchemy()
