@@ -12,12 +12,14 @@ categoryId = 1
 
 @blp.route("/category/<int:category_id>")
 class Category(MethodView):
+    @blp.response(200, CategorySchema)
     def get(self, category_id):
         try:
             return CATEGORIES[category_id]
         except KeyError:
             abort(400, message="Error category not found")
 
+    @blp.response(200, CategorySchema)
     def delete(self, category_id):
         try:
             deleted_category = CATEGORIES[category_id]
@@ -29,10 +31,12 @@ class Category(MethodView):
 
 @blp.route("/category")
 class CategoryList(MethodView):
+    @blp.response(200, CategorySchema(many=True))
     def get(self):
-        return CATEGORIES
+        return list(CATEGORIES.values())
 
     @blp.arguments(CategorySchema)
+    @blp.response(200, CategorySchema)
     def post(self, request_data):
         global categoryId
         categoryId += 1

@@ -2,19 +2,21 @@ from flask_smorest import Blueprint, abort
 from flask.views import MethodView
 from python_backend.db import *
 from flask import request, jsonify
-from python_backend.schemas import NoteSchema
+from python_backend.schemas import NoteSchema, NoteQuerySchema
 blp = Blueprint("note", __name__, description="more comfortable operations with notes")
 noteId = 1
 
 
 @blp.route("/note/<int:note_id>")
 class Note(MethodView):
+    @blp.response(200, NoteSchema)
     def get(self, note_id):
         try:
             return NOTES[note_id]
         except KeyError:
             abort(400, "Error note not found")
 
+    @blp.response(200, NoteSchema)
     def delete(self, note_id):
         try:
             deleted_note = NOTES[note_id]
@@ -26,21 +28,26 @@ class Note(MethodView):
 
 @blp.route("/note")
 class NoteList(MethodView):
-    def get(self):
-        request_data = request.get_json()
+    @blp.arguments(NoteQuerySchema, location="query", as_kwargs=True)
+    @blp.response(200, NoteSchema(many=True))
+    def get(self, **kwargs):
         user_notes = [*NOTES.values()]
         try:
-            id_user = request_data["user_id"]
+            id_user = int(kwargs.get("user_id"))
+            print(id_user)
             try:
-                id_category = request_data["category_id"]
+                id_category = int(kwargs.get("category_id"))
+                print(id_category)
+                print(user_notes)
                 return list(filter(lambda x: (x.get("user_id") == id_user
                                               and x.get("category_id") == id_category), user_notes))
-            except KeyError:
+            except TypeError:
                 return list(filter(lambda x: (x.get("user_id") == id_user), user_notes))
-        except KeyError:
+        except TypeError:
             abort(400, message="Error, missing user_id")
 
     @blp.arguments(NoteSchema)
+    @blp.response(200, NoteSchema)
     def post(self, request_data):
         note = {}
         global noteId

@@ -11,6 +11,11 @@ class CategorySchema(Schema):
     title = fields.Str(required=True)
 
 
+class NoteQuerySchema(Schema):
+    user_id = fields.Int(required=True)
+    category_id = fields.Int()
+
+
 class NoteSchema(Schema):
     id = fields.Int(dump_only=True)
     user_id = fields.Int(required=True)
