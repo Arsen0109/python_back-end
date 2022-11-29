@@ -1,29 +1,22 @@
 from flask_smorest import Blueprint, abort
 from flask.views import MethodView
+from sqlalchemy.exc import IntegrityError
 from python_backend.db import *
-from flask import request, jsonify
+from python_backend.models import NoteModel
 from python_backend.schemas import NoteSchema, NoteQuerySchema
 blp = Blueprint("note", __name__, description="more comfortable operations with notes")
-noteId = 1
 
 
 @blp.route("/note/<int:note_id>")
 class Note(MethodView):
     @blp.response(200, NoteSchema)
     def get(self, note_id):
-        try:
-            return NOTES[note_id]
-        except KeyError:
-            abort(400, "Error note not found")
+        note = NoteModel.query.get_or_404(note_id)
+        return note
 
     @blp.response(200, NoteSchema)
-    def delete(self, note_id):
-        try:
-            deleted_note = NOTES[note_id]
-            del NOTES[note_id]
-            return deleted_note
-        except KeyError:
-            abort(400, "Error note not found")
+    def delete(self, id_note):
+        raise NotImplementedError("Not implemented for now")
 
 
 @blp.route("/note")
@@ -31,31 +24,31 @@ class NoteList(MethodView):
     @blp.arguments(NoteQuerySchema, location="query", as_kwargs=True)
     @blp.response(200, NoteSchema(many=True))
     def get(self, **kwargs):
-        user_notes = [*NOTES.values()]
         try:
-            id_user = int(kwargs.get("user_id"))
-            print(id_user)
+            user_id = int(kwargs.get("user_id"))
+            print(user_id)
+            query = NoteModel.query.filter(user_id == user_id)
             try:
-                id_category = int(kwargs.get("category_id"))
-                print(id_category)
-                print(user_notes)
-                return list(filter(lambda x: (x.get("user_id") == id_user
-                                              and x.get("category_id") == id_category), user_notes))
+                category_id = int(kwargs.get("category_id"))
+                query = NoteModel.query.filter(category_id == category_id)
+                return query.all()
             except TypeError:
-                return list(filter(lambda x: (x.get("user_id") == id_user), user_notes))
+                return query.all()
         except TypeError:
             abort(400, message="Error, missing user_id")
 
     @blp.arguments(NoteSchema)
     @blp.response(200, NoteSchema)
     def post(self, request_data):
-        note = {}
-        global noteId
-        noteId += 1
-        note["id"] = noteId
-        note["user_id"] = request_data["user_id"]
-        note["category_id"] = request_data["category_id"]
-        note["date_of_creating"] = datetime.datetime.now().strftime("%d.%m.%Y %H:%M:%S")
-        note["price"] = request.get_json()["price"]
-        NOTES[noteId] = note
+        try:
+            request_data["currency_id"]
+        except KeyError:
+            request_data["currency_id"] = 1
+        note = NoteModel(**request_data)
+        try:
+            db.session.add(note)
+            db.session.commit()
+        except IntegrityError:
+            abort(400, message="Error bad request")
+
         return note

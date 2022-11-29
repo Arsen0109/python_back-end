@@ -1,43 +1,37 @@
 from flask_smorest import Blueprint, abort
-from flask import request, jsonify
 from flask.views import MethodView
-from python_backend.db import USERS
+from python_backend.db import db
+from python_backend.models.user_model import UserModel
 from python_backend.schemas import UserSchema
-
+from sqlalchemy.exc import IntegrityError
 blp = Blueprint("user", __name__, description="more comfortable operations with users")
-
-userId = 1
 
 
 @blp.route("/user/<int:user_id>")
 class User(MethodView):
     @blp.response(200, UserSchema)
     def get(self, user_id):
-        try:
-            return USERS[user_id]
-        except KeyError:
-            abort(400, message="Error user not found")
+        user = UserModel.query.get_or_404(user_id)
+        return user
 
     @blp.response(200, UserSchema)
-    def delete(self, user_id):
-        try:
-            deleted_user = USERS[user_id]
-            del USERS[user_id]
-            return deleted_user
-        except KeyError:
-            abort(400, message="Error user not found")
+    def delete(self, category_id):
+        raise NotImplementedError("Not implemented for now")
 
 
 @blp.route("/user")
 class UserList(MethodView):
     @blp.response(200, UserSchema(many=True))
     def get(self):
-        return list(USERS.values())
+        return UserModel.query.all()
 
     @blp.arguments(UserSchema)
     @blp.response(200, UserSchema)
     def post(self, request_data):
-        global userId
-        userId += 1
-        USERS[userId] = {"id": userId, "name": request_data["name"]}
-        return jsonify(USERS[userId])
+        user = UserModel(**request_data)
+        try:
+            db.session.add(user)
+            db.session.commit()
+        except IntegrityError:
+            abort(400, "User with this name already exists")
+        return user
