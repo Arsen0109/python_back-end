@@ -14,6 +14,8 @@ app.config["OPENAPI_VERSION"] = "3.0.3"
 app.config["OPENAPI_URL_PREFIX"] = "/"
 app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///data.db"
 app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
+app.config["SECRET_KEY"] = "supermegasecretkey"
+
 db.db.init_app(app)
 
 api = Api(app)
@@ -29,6 +31,7 @@ api.register_blueprint(UserBlueprint)
 api.register_blueprint(CategoryBlueprint)
 api.register_blueprint(NoteBlueprint)
 api.register_blueprint(CurrencyBlueprint)
+
 
 
 @app.route("/")

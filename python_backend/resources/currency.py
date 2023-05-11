@@ -16,8 +16,11 @@ class Currency(MethodView):
         return currency
 
     @blp.response(200, CurrencySchema)
-    def delete(self, category_id):
-        raise NotImplementedError("Not implemented for now")
+    def delete(self, currency_id):
+        currency = CurrencyModel.query.get_or_404(currency_id)
+        db.session.delete(currency)
+        db.session.commit()
+        return currency
 
 
 @blp.route("/currency")

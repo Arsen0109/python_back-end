@@ -15,8 +15,11 @@ class Note(MethodView):
         return note
 
     @blp.response(200, NoteSchema)
-    def delete(self, id_note):
-        raise NotImplementedError("Not implemented for now")
+    def delete(self, note_id):
+        note = NoteModel.query.get_or_404(note_id)
+        db.session.delete(note)
+        db.session.commit()
+        return note
 
 
 @blp.route("/note")
