@@ -4,8 +4,10 @@ import datetime
 from functools import wraps
 from .models import UserModel
 from werkzeug.security import check_password_hash
+from . import settings
 
 app = Flask(__name__)
+settings.setup(app)
 
 
 @app.route("/login")

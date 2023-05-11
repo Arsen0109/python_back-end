@@ -1,57 +1,76 @@
 from flask_smorest import Blueprint, abort
-from flask.views import MethodView
+from python_backend import token_required
 from sqlalchemy.exc import IntegrityError
 from python_backend.db import *
 from python_backend.models import NoteModel
-from python_backend.schemas import NoteSchema, NoteQuerySchema
+from python_backend.schemas import NoteSchema, NoteResponseSchema
 blp = Blueprint("note", __name__, description="more comfortable operations with notes")
 
 
 @blp.route("/note/<int:note_id>")
-class Note(MethodView):
-    @blp.response(200, NoteSchema)
-    def get(self, note_id):
-        note = NoteModel.query.get_or_404(note_id)
-        return note
+@blp.response(200, NoteResponseSchema)
+@token_required
+def get(current_user, note_id):
+    note = NoteModel.query.filter_by(user_id=current_user.id, id=note_id).first()
+    return note
 
-    @blp.response(200, NoteSchema)
-    def delete(self, note_id):
-        note = NoteModel.query.get_or_404(note_id)
-        db.session.delete(note)
+
+@blp.route("/note/<int:note_id>", methods=["PUT"])
+@blp.arguments(NoteSchema)
+@blp.response(200, NoteResponseSchema)
+@token_required
+def update(current_user, request_data, note_id):
+    note = NoteModel.query.filter_by(user_id=current_user.id, id=note_id).first()
+    try:
+        note.category_id = request_data["category_id"]
+        note.price = request_data["price"]
         db.session.commit()
-        return note
+    except Exception:
+        abort(400, message="Error fields category_id and price are required for put operation")
+    return note
+
+
+@blp.route("/note/<int:note_id>", methods=["DELETE"])
+@blp.response(200, NoteResponseSchema)
+@token_required
+def delete(current_user, note_id):
+    note = NoteModel.query.filter_by(user_id=current_user.id, id=note_id).first()
+    db.session.delete(note)
+    db.session.commit()
+    return note
 
 
 @blp.route("/note")
-class NoteList(MethodView):
-    @blp.arguments(NoteQuerySchema, location="query", as_kwargs=True)
-    @blp.response(200, NoteSchema(many=True))
-    def get(self, **kwargs):
+@blp.response(200, NoteResponseSchema(many=True))
+@token_required
+def get(current_user, **kwargs):
+    try:
+        query = NoteModel.query.filter(user_id == current_user.id)
         try:
-            user_id = int(kwargs.get("user_id"))
-            print(user_id)
-            query = NoteModel.query.filter(user_id == user_id)
-            try:
-                category_id = int(kwargs.get("category_id"))
-                query = NoteModel.query.filter(category_id == category_id)
-                return query.all()
-            except TypeError:
-                return query.all()
+            category_id = int(kwargs.get("category_id"))
+            query = NoteModel.query.filter_by(user_id=current_user.id, category_id=category_id)
+            return query.all()
         except TypeError:
-            abort(400, message="Error, missing user_id")
+            return query.all()
+    except TypeError:
+        abort(400, message="Error, missing user_id")
 
-    @blp.arguments(NoteSchema)
-    @blp.response(200, NoteSchema)
-    def post(self, request_data):
-        try:
-            request_data["currency_id"]
-        except KeyError:
-            request_data["currency_id"] = 1
-        note = NoteModel(**request_data)
-        try:
-            db.session.add(note)
-            db.session.commit()
-        except IntegrityError:
-            abort(400, message="Error bad request")
 
-        return note
+@blp.route("/note", methods=["POST"])
+@blp.arguments(NoteSchema)
+@blp.response(200, NoteResponseSchema)
+@token_required
+def post(current_user, request_data):
+    try:
+        request_data["currency_id"]
+    except KeyError:
+        request_data["currency_id"] = 1
+    note = NoteModel(**request_data)
+    note.user_id = current_user.id
+    try:
+        db.session.add(note)
+        db.session.commit()
+    except IntegrityError:
+        abort(400, message="Error bad request")
+
+    return note
