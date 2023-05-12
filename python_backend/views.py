@@ -21,7 +21,6 @@ api.register_blueprint(NoteBlueprint)
 api.register_blueprint(CurrencyBlueprint)
 
 
-
 @app.route("/")
 def hello():
     return "Hello world!"

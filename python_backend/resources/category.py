@@ -14,6 +14,8 @@ blp = Blueprint("category", __name__, description="more comfortable operations w
 @blp.response(200, CategoryResponseSchema)
 def get(current_user, category_id):
     category = CategoryModel.query.filter_by(id=category_id, user_id=current_user.id).first()
+    if not category:
+        abort(400, message="No category found")
     return category
 
 
@@ -22,7 +24,9 @@ def get(current_user, category_id):
 @blp.arguments(CategorySchema)
 @blp.response(200, CategoryResponseSchema)
 def update(current_user, request_data, category_id):
-    category = CategoryModel.query.get_or_404(category_id)
+    category = CategoryModel.filter_by(category_id=category_id, user_id=current_user.id).first()
+    if not category:
+        abort(400, message="No category found")
     try:
         category.title = request_data["title"]
         db.session.commit()
@@ -36,6 +40,8 @@ def update(current_user, request_data, category_id):
 @token_required
 def delete(current_user, category_id):
     category = CategoryModel.query.filter_by(id=category_id, user_id=current_user.id).first()
+    if not category:
+        abort(400, message="No category found")
     db.session.delete(category)
     db.session.commit()
     return category
