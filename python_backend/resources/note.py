@@ -12,6 +12,8 @@ blp = Blueprint("note", __name__, description="more comfortable operations with 
 @token_required
 def get(current_user, note_id):
     note = NoteModel.query.filter_by(user_id=current_user.id, id=note_id).first()
+    if not note:
+        abort(400, message="No note found")
     return note
 
 
@@ -21,6 +23,8 @@ def get(current_user, note_id):
 @token_required
 def update(current_user, request_data, note_id):
     note = NoteModel.query.filter_by(user_id=current_user.id, id=note_id).first()
+    if not note:
+        abort(400, message="No note found")
     try:
         note.category_id = request_data["category_id"]
         note.price = request_data["price"]
@@ -35,6 +39,8 @@ def update(current_user, request_data, note_id):
 @token_required
 def delete(current_user, note_id):
     note = NoteModel.query.filter_by(user_id=current_user.id, id=note_id).first()
+    if not note:
+        abort(400, message="No note found")
     db.session.delete(note)
     db.session.commit()
     return note
