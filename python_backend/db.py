@@ -1,5 +1,4 @@
 import datetime
-
 user_id = 1
 category_id = 1
 note_id = 1

@@ -51,7 +51,7 @@ def delete(current_user, note_id):
 @token_required
 def get(current_user, **kwargs):
     try:
-        query = NoteModel.query.filter(user_id == current_user.id)
+        query = NoteModel.query.filter_by(user_id=current_user.id)
         try:
             category_id = int(kwargs.get("category_id"))
             query = NoteModel.query.filter_by(user_id=current_user.id, category_id=category_id)
