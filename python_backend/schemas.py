@@ -35,6 +35,7 @@ class NoteResponseSchema(Schema):
     category_id = fields.Int(required=True)
     currency_id = fields.Int()
     price = fields.Float(required=True)
+    date_of_creating = fields.Date()
 
 
 class NoteSchema(Schema):

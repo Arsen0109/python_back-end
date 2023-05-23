@@ -1,5 +1,5 @@
 from sqlalchemy import func
-
+import datetime
 from python_backend.db import db
 
 
@@ -26,7 +26,7 @@ class NoteModel(db.Model):
         unique=False,
         nullable=False
     )
-    date_of_creating = db.Column(db.TIMESTAMP, server_default=func.now())
+    date_of_creating = db.Column(db.Date, default=datetime.datetime.now())
     price = db.Column(db.Float(precision=2), unique=False, nullable=False)
     user = db.relationship("UserModel", back_populates="note")
     category = db.relationship("CategoryModel", back_populates="note")
