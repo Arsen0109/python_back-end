@@ -1,4 +1,3 @@
-from sqlalchemy import func
 import datetime
 from python_backend.db import db
 
